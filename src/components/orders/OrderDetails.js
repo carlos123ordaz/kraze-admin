@@ -62,7 +62,7 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
     return (
         <>
             <Grid container spacing={3}>
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }}>
                     <Card sx={{ mb: 3 }}>
                         <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -83,46 +83,48 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {order.items.map((item, index) => (
+                                        {order.items?.map((item, index) => (
                                             <TableRow key={index}>
                                                 <TableCell>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                         <Avatar
-                                                            src={item.producto?.imagenesPrincipales?.[0]?.url}
+                                                            src={item.imagen || item.producto?.imagenesPrincipales?.[0]?.url}
                                                             variant="rounded"
                                                             sx={{ width: 48, height: 48 }}
                                                         />
                                                         <Typography variant="body2" fontWeight={500}>
-                                                            {item.producto?.nombre || 'Producto eliminado'}
+                                                            {item.nombre || 'Producto eliminado'}
                                                         </Typography>
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell>
                                                     <Box>
                                                         <Typography variant="body2">
-                                                            {item.variante?.talla}
+                                                            {item.talla}
                                                         </Typography>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                            <Box
-                                                                sx={{
-                                                                    width: 12,
-                                                                    height: 12,
-                                                                    borderRadius: 1,
-                                                                    backgroundColor: item.variante?.color?.codigoHex,
-                                                                    border: '1px solid',
-                                                                    borderColor: 'divider',
-                                                                }}
-                                                            />
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                {item.variante?.color?.nombre}
-                                                            </Typography>
-                                                        </Box>
+                                                        {item.color && (
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                                                                <Box
+                                                                    sx={{
+                                                                        width: 12,
+                                                                        height: 12,
+                                                                        borderRadius: 1,
+                                                                        backgroundColor: item.color.codigoHex,
+                                                                        border: '1px solid',
+                                                                        borderColor: 'divider',
+                                                                    }}
+                                                                />
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    {item.color.nombre}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell align="center">{item.cantidad}</TableCell>
                                                 <TableCell align="right">{formatCurrency(item.precioUnitario)}</TableCell>
                                                 <TableCell align="right" sx={{ fontWeight: 600 }}>
-                                                    {formatCurrency(item.subtotal)}
+                                                    {formatCurrency(item.precioTotal)}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -135,17 +137,17 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                                         <Typography variant="body2">Subtotal</Typography>
                                         <Typography variant="body2">
-                                            {formatCurrency(order.totales.subtotal)}
+                                            {formatCurrency(order.montos?.subtotal || 0)}
                                         </Typography>
                                     </Box>
 
-                                    {order.totales.descuentos > 0 && (
+                                    {order.montos?.descuentos > 0 && (
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                                             <Typography variant="body2" color="success.main">
                                                 Descuentos
                                             </Typography>
                                             <Typography variant="body2" color="success.main">
-                                                -{formatCurrency(order.totales.descuentos)}
+                                                -{formatCurrency(order.montos.descuentos)}
                                             </Typography>
                                         </Box>
                                     )}
@@ -153,7 +155,10 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                                         <Typography variant="body2">Envío</Typography>
                                         <Typography variant="body2">
-                                            {order.totales.envio === 0 ? 'Gratis' : formatCurrency(order.totales.envio)}
+                                            {order.montos?.costoEnvio === 0
+                                                ? 'Gratis'
+                                                : formatCurrency(order.montos?.costoEnvio || 0)
+                                            }
                                         </Typography>
                                     </Box>
 
@@ -164,7 +169,7 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                                             Total
                                         </Typography>
                                         <Typography variant="h6" fontWeight={600}>
-                                            {formatCurrency(order.totales.total)}
+                                            {formatCurrency(order.montos?.total || 0)}
                                         </Typography>
                                     </Box>
                                 </Box>
@@ -184,7 +189,7 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                     <Card sx={{ mb: 3 }}>
                         <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -217,14 +222,19 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                             </Box>
 
                             <Typography variant="body2" fontWeight={500}>
-                                {order.datosEnvio.nombres} {order.datosEnvio.apellidos}
+                                {order.cliente?.nombres} {order.cliente?.apellidos}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {order.datosEnvio.email}
+                                {order.cliente?.email}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {order.datosEnvio.telefono}
+                                {order.cliente?.telefono}
                             </Typography>
+                            {order.cliente?.dni && (
+                                <Typography variant="body2" color="text.secondary">
+                                    DNI: {order.cliente.dni}
+                                </Typography>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -238,19 +248,24 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                             </Box>
 
                             <Typography variant="body2">
-                                {order.datosEnvio.direccion}
+                                {order.direccionEnvio?.direccion}
                             </Typography>
-                            {order.datosEnvio.referencia && (
+                            {order.direccionEnvio?.referencia && (
                                 <Typography variant="body2" color="text.secondary">
-                                    Ref: {order.datosEnvio.referencia}
+                                    Ref: {order.direccionEnvio.referencia}
                                 </Typography>
                             )}
                             <Typography variant="body2">
-                                {order.datosEnvio.distrito}, {order.datosEnvio.provincia}
+                                {order.direccionEnvio?.distrito}, {order.direccionEnvio?.provincia}
                             </Typography>
                             <Typography variant="body2">
-                                {order.datosEnvio.departamento}
+                                {order.direccionEnvio?.departamento}
                             </Typography>
+                            {order.direccionEnvio?.codigoPostal && (
+                                <Typography variant="body2" color="text.secondary">
+                                    CP: {order.direccionEnvio.codigoPostal}
+                                </Typography>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -263,7 +278,7 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                                         Pago
                                     </Typography>
                                 </Box>
-                                {order.estadoPago === 'pendiente' && (
+                                {order.metodoPago?.estado === 'pendiente' && (
                                     <Button
                                         size="small"
                                         onClick={() => setPaymentDialog(true)}
@@ -278,7 +293,7 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                                     Método
                                 </Typography>
                                 <Typography variant="body2">
-                                    {PAYMENT_METHODS[order.metodoPago.tipo] || order.metodoPago.tipo}
+                                    {PAYMENT_METHODS[order.metodoPago?.tipo] || order.metodoPago?.tipo}
                                 </Typography>
                             </Box>
 
@@ -288,17 +303,29 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                                 </Typography>
                                 <Box sx={{ mt: 0.5 }}>
                                     <Chip
-                                        label={order.estadoPago}
+                                        label={order.metodoPago?.estado || 'pendiente'}
                                         size="small"
-                                        color={order.estadoPago === 'pagado' ? 'success' : 'warning'}
+                                        color={order.metodoPago?.estado === 'pagado' ? 'success' : 'warning'}
                                     />
                                 </Box>
                             </Box>
+
+                            {order.metodoPago?.fechaPago && (
+                                <Box sx={{ mt: 1 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Fecha de Pago
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {new Date(order.metodoPago.fechaPago).toLocaleDateString()}
+                                    </Typography>
+                                </Box>
+                            )}
                         </CardContent>
                     </Card>
                 </Grid>
             </Grid>
 
+            {/* Dialog para cambiar estado */}
             <Dialog open={statusDialog} onClose={() => setStatusDialog(false)} maxWidth="sm" fullWidth>
                 <DialogTitle>Actualizar Estado de Orden</DialogTitle>
                 <DialogContent>
@@ -334,6 +361,7 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                 </DialogActions>
             </Dialog>
 
+            {/* Dialog para confirmar pago */}
             <Dialog open={paymentDialog} onClose={() => setPaymentDialog(false)} maxWidth="sm" fullWidth>
                 <DialogTitle>Confirmar Pago</DialogTitle>
                 <DialogContent>
@@ -345,7 +373,7 @@ export default function OrderDetails({ order, onUpdateStatus, onConfirmPayment }
                         sx={{ mt: 2, mb: 2 }}
                     />
 
-                    {order.metodoPago.tipo === 'yape' && (
+                    {order.metodoPago?.tipo === 'yape' && (
                         <>
                             <TextField
                                 fullWidth

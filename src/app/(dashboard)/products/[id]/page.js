@@ -30,11 +30,12 @@ export default function EditProductPage() {
     const fetchProduct = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`/products/${productId}`);
+            // Cambiar a la nueva ruta /id/:id
+            const { data } = await axios.get(`/products/id/${productId}`);
             setProduct(data.producto);
         } catch (error) {
             console.error('Error al cargar producto:', error);
-            setError('Error al cargar el producto');
+            setError(error.response?.data?.mensaje || 'Error al cargar el producto');
         } finally {
             setLoading(false);
         }
@@ -68,6 +69,14 @@ export default function EditProductPage() {
 
     if (loading) {
         return <LoadingSpinner />;
+    }
+
+    if (error && !product) {
+        return (
+            <Box>
+                <Alert severity="error">{error}</Alert>
+            </Box>
+        );
     }
 
     if (!product) {
@@ -104,7 +113,7 @@ export default function EditProductPage() {
 
             <Box sx={{ mt: 3 }}>
                 <VariantForm
-                    variants={product.variantes}
+                    variants={product.variantes || []}
                     onChange={handleVariantsChange}
                 />
             </Box>

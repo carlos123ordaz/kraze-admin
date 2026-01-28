@@ -5,9 +5,9 @@ import { useParams } from 'next/navigation';
 import { Box, Grid, Alert, Snackbar } from '@mui/material';
 import PageHeader from '../../../../components/common/PageHeader';
 import OrderDetails from '../../../../components/orders/OrderDetails';
-import OrderTimeline from '../../../../components/orders/OrderTimeline';
 import LoadingSpinner from '../../../../components/common/LoadingSpinner';
 import axios from '../../../../lib/axios';
+import OrderTimeline from '@/components/orders/OrderTimeline';
 
 export default function OrderDetailPage() {
     const params = useParams();
@@ -109,7 +109,7 @@ export default function OrderDetailPage() {
                 </Grid>
 
                 <Grid size={{ xs: 12 }} lg={4}>
-                    <OrderTimeline historialEstados={order.historialEstados} />
+                    <OrderTimeline orden={order} />
                 </Grid>
             </Grid>
 
