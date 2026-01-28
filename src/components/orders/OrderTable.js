@@ -5,10 +5,9 @@ import {
     Box,
     Card,
     CardContent,
-    Avatar,
     Chip,
 } from '@mui/material';
-import { Visibility, LocalShipping } from '@mui/icons-material';
+import { Visibility } from '@mui/icons-material';
 import DataTable from '../common/DataTable';
 import StatusBadge from '../common/StatusBadge';
 import { formatCurrency, formatDateTime } from '../../lib/utils';
@@ -21,13 +20,14 @@ export default function OrderTable({
     onPageChange,
 }) {
     const router = useRouter();
+
     const columns = [
         {
             id: 'numeroOrden',
             label: 'Orden',
             render: (row) => (
                 <Box sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    {row.numeroOrden}
+                    {row.numeroOrden || 'N/A'}
                 </Box>
             ),
         },
@@ -37,10 +37,10 @@ export default function OrderTable({
             render: (row) => (
                 <Box>
                     <Box sx={{ fontWeight: 500, mb: 0.5 }}>
-                        {row.datosEnvio.nombres} {row.datosEnvio.apellidos}
+                        {row.cliente?.nombres} {row.cliente?.apellidos}
                     </Box>
                     <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-                        {row.datosEnvio.email}
+                        {row.cliente?.email}
                     </Box>
                 </Box>
             ),
@@ -55,7 +55,7 @@ export default function OrderTable({
             label: 'Método de Pago',
             render: (row) => (
                 <Chip
-                    label={PAYMENT_METHODS[row.metodoPago.tipo] || row.metodoPago.tipo}
+                    label={PAYMENT_METHODS[row.metodoPago?.tipo] || row.metodoPago?.tipo || 'N/A'}
                     size="small"
                     variant="outlined"
                 />
@@ -67,7 +67,7 @@ export default function OrderTable({
             align: 'right',
             render: (row) => (
                 <Box sx={{ fontWeight: 600 }}>
-                    {formatCurrency(row.totales.total)}
+                    {formatCurrency(row.montos?.total || 0)}
                 </Box>
             ),
         },
@@ -85,7 +85,7 @@ export default function OrderTable({
             id: 'items',
             label: 'Items',
             align: 'center',
-            render: (row) => row.items.length,
+            render: (row) => row.items?.length || 0,
         },
     ];
 

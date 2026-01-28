@@ -1,14 +1,8 @@
+// src/app/orders/page.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-    Box,
-    Grid,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-} from '@mui/material';
+import { Box, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import PageHeader from '../../../components/common/PageHeader';
 import SearchBar from '../../../components/common/SearchBar';
 import OrderTable from '../../../components/orders/OrderTable';
@@ -18,6 +12,7 @@ import { ORDER_STATUSES } from '../../../lib/constants';
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [mounted, setMounted] = useState(false); // Agregar esto
     const [pagination, setPagination] = useState({
         paginaActual: 1,
         total: 0,
@@ -31,9 +26,16 @@ export default function OrdersPage() {
         limite: 20,
     });
 
+    // Asegurar que el componente esté montado
     useEffect(() => {
-        fetchOrders();
-    }, [filters]);
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (mounted) {
+            fetchOrders();
+        }
+    }, [filters, mounted]);
 
     const fetchOrders = async () => {
         try {
@@ -44,7 +46,7 @@ export default function OrdersPage() {
             });
 
             const { data } = await axios.get(`/orders?${params}`);
-            setOrders(data.ordenes);
+            setOrders(data.ordenes || []);
             setPagination({
                 paginaActual: data.paginaActual,
                 total: data.total,
@@ -52,6 +54,7 @@ export default function OrdersPage() {
             });
         } catch (error) {
             console.error('Error al cargar órdenes:', error);
+            setOrders([]);
         } finally {
             setLoading(false);
         }
@@ -68,6 +71,11 @@ export default function OrdersPage() {
     const handlePageChange = (newPage) => {
         setFilters({ ...filters, pagina: newPage });
     };
+
+    // Mostrar skeleton mientras se monta el componente
+    if (!mounted) {
+        return null; // o un skeleton loader
+    }
 
     return (
         <Box>
