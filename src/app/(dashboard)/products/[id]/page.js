@@ -30,7 +30,6 @@ export default function EditProductPage() {
     const fetchProduct = async () => {
         try {
             setLoading(true);
-            // Cambiar a la nueva ruta /id/:id
             const { data } = await axios.get(`/products/id/${productId}`);
             setProduct(data.producto);
         } catch (error) {
@@ -54,7 +53,6 @@ export default function EditProductPage() {
         try {
             setSaving(true);
             setError('');
-
             await axios.put(`/products/${productId}`, formData);
             router.push('/products');
         } catch (err) {
@@ -63,8 +61,8 @@ export default function EditProductPage() {
         }
     };
 
-    const handleVariantsChange = (variants) => {
-        setProduct({ ...product, variantes: variants });
+    const handleVariantsUpdate = (updatedVariants) => {
+        setProduct({ ...product, variantes: updatedVariants });
     };
 
     if (loading) {
@@ -113,8 +111,9 @@ export default function EditProductPage() {
 
             <Box sx={{ mt: 3 }}>
                 <VariantForm
+                    productId={productId}
                     variants={product.variantes || []}
-                    onChange={handleVariantsChange}
+                    onVariantsUpdate={handleVariantsUpdate}
                 />
             </Box>
         </Box>

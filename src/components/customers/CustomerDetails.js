@@ -17,9 +17,27 @@ import { Person, Email, Phone, LocationOn, ShoppingCart } from '@mui/icons-mater
 import { formatCurrency, formatDateTime, getInitials } from '../../lib/utils';
 
 export default function CustomerDetails({ customer }) {
+    // Función auxiliar para obtener el total de una orden de forma segura
+    const getOrdenTotal = (orden) => {
+        if (!orden) return 0;
+        if (orden.totales && typeof orden.totales.total === 'number') {
+            return orden.totales.total;
+        }
+        if (typeof orden.total === 'number') {
+            return orden.total;
+        }
+        return 0;
+    };
+
+    // Función auxiliar para obtener el estado de una orden
+    const getOrdenEstado = (orden) => {
+        if (!orden) return 'desconocido';
+        return orden.estado || 'pendiente';
+    };
+
     return (
         <Grid container spacing={3}>
-            <Grid size={{ xs: 12 }} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
                 <Card>
                     <CardContent sx={{ textAlign: 'center' }}>
                         <Avatar
@@ -125,7 +143,7 @@ export default function CustomerDetails({ customer }) {
                         ) : (
                             <List>
                                 {customer.direcciones.map((direccion, index) => (
-                                    <Box key={index}>
+                                    <Box key={direccion._id || index}>
                                         {index > 0 && <Divider />}
                                         <ListItem>
                                             <ListItemText
@@ -133,9 +151,9 @@ export default function CustomerDetails({ customer }) {
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                                         <LocationOn fontSize="small" color="primary" />
                                                         <Typography variant="body2" fontWeight={600}>
-                                                            {direccion.alias || `Dirección ${index + 1}`}
+                                                            {direccion.alias || direccion.label || `Dirección ${index + 1}`}
                                                         </Typography>
-                                                        {direccion.porDefecto && (
+                                                        {direccion.isDefault && (
                                                             <Chip label="Por defecto" size="small" color="primary" />
                                                         )}
                                                     </Box>
@@ -146,7 +164,7 @@ export default function CustomerDetails({ customer }) {
                                                             {direccion.direccion}
                                                         </Typography>
                                                         {direccion.referencia && (
-                                                            <Typography variant="caption" color="text.secondary">
+                                                            <Typography variant="caption" color="text.secondary" display="block">
                                                                 Ref: {direccion.referencia}
                                                             </Typography>
                                                         )}
@@ -157,8 +175,13 @@ export default function CustomerDetails({ customer }) {
                                                             {direccion.departamento}
                                                         </Typography>
                                                         {direccion.codigoPostal && (
-                                                            <Typography variant="caption" color="text.secondary">
+                                                            <Typography variant="caption" color="text.secondary" display="block">
                                                                 CP: {direccion.codigoPostal}
+                                                            </Typography>
+                                                        )}
+                                                        {direccion.telefono && (
+                                                            <Typography variant="caption" color="text.secondary" display="block">
+                                                                Tel: {direccion.telefono}
                                                             </Typography>
                                                         )}
                                                     </Box>
@@ -184,37 +207,46 @@ export default function CustomerDetails({ customer }) {
                             </Typography>
                         ) : (
                             <List>
-                                {customer.ordenesRecientes.map((orden, index) => (
-                                    <Box key={orden._id}>
-                                        {index > 0 && <Divider />}
-                                        <ListItem>
-                                            <ListItemText
-                                                primary={
-                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <Typography variant="body2" fontWeight={600} color="primary.main">
-                                                            {orden.numeroOrden}
-                                                        </Typography>
-                                                        <Chip
-                                                            label={orden.estado}
-                                                            size="small"
-                                                            color="primary"
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {formatDateTime(orden.createdAt)}
-                                                        </Typography>
-                                                        <Typography variant="body2" fontWeight={600}>
-                                                            {formatCurrency(orden.totales.total)}
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                    </Box>
-                                ))}
+                                {customer.ordenesRecientes.map((orden, index) => {
+                                    if (!orden) return null;
+                                    
+                                    return (
+                                        <Box key={orden._id || index}>
+                                            {index > 0 && <Divider />}
+                                            <ListItem>
+                                                <ListItemText
+                                                    primary={
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                            <Typography variant="body2" fontWeight={600} color="primary.main">
+                                                                {orden.numeroOrden || `Orden #${index + 1}`}
+                                                            </Typography>
+                                                            <Chip
+                                                                label={getOrdenEstado(orden)}
+                                                                size="small"
+                                                                color={
+                                                                    getOrdenEstado(orden) === 'entregado' ? 'success' :
+                                                                    getOrdenEstado(orden) === 'cancelado' ? 'error' :
+                                                                    getOrdenEstado(orden) === 'enviado' ? 'info' :
+                                                                    'primary'
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    }
+                                                    secondary={
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                {orden.createdAt ? formatDateTime(orden.createdAt) : 'Fecha no disponible'}
+                                                            </Typography>
+                                                            <Typography variant="body2" fontWeight={600}>
+                                                                {formatCurrency(getOrdenTotal(orden))}
+                                                            </Typography>
+                                                        </Box>
+                                                    }
+                                                />
+                                            </ListItem>
+                                        </Box>
+                                    );
+                                })}
                             </List>
                         )}
                     </CardContent>
