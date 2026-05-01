@@ -19,11 +19,14 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
+    Snackbar,
+    Alert,
 } from '@mui/material';
 import { CheckCircle, Cancel, Visibility } from '@mui/icons-material';
 import PageHeader from '../../../components/common/PageHeader';
 import SearchBar from '../../../components/common/SearchBar';
 import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import { formatDateTime } from '../../../lib/utils';
 import axios from '../../../lib/axios';
 
@@ -36,6 +39,7 @@ export default function ReviewsPage() {
         calificacion: '',
     });
     const [actionDialog, setActionDialog] = useState({ open: false, id: null, action: null });
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         fetchReviews();
@@ -63,9 +67,11 @@ export default function ReviewsPage() {
             await axios.put(`/reviews/${actionDialog.id}/aprobar`);
             fetchReviews();
             setActionDialog({ open: false, id: null, action: null });
+            setSnackbar({ open: true, message: 'Reseña aprobada correctamente', severity: 'success' });
         } catch (error) {
             console.error('Error al aprobar reseña:', error);
-            alert('Error al aprobar reseña');
+            setActionDialog({ open: false, id: null, action: null });
+            setSnackbar({ open: true, message: 'Error al aprobar la reseña', severity: 'error' });
         }
     };
 
@@ -74,9 +80,11 @@ export default function ReviewsPage() {
             await axios.put(`/reviews/${actionDialog.id}/rechazar`);
             fetchReviews();
             setActionDialog({ open: false, id: null, action: null });
+            setSnackbar({ open: true, message: 'Reseña rechazada', severity: 'info' });
         } catch (error) {
             console.error('Error al rechazar reseña:', error);
-            alert('Error al rechazar reseña');
+            setActionDialog({ open: false, id: null, action: null });
+            setSnackbar({ open: true, message: 'Error al rechazar la reseña', severity: 'error' });
         }
     };
 
@@ -145,9 +153,7 @@ export default function ReviewsPage() {
             <Card>
                 <CardContent>
                     {loading ? (
-                        <Typography variant="body2" color="text.secondary" textAlign="center" py={3}>
-                            Cargando...
-                        </Typography>
+                        <LoadingSpinner />
                     ) : reviews.length === 0 ? (
                         <Typography variant="body2" color="text.secondary" textAlign="center" py={3}>
                             No hay reseñas para mostrar
@@ -236,6 +242,21 @@ export default function ReviewsPage() {
                 confirmText={actionDialog.action === 'approve' ? 'Aprobar' : 'Rechazar'}
                 severity={actionDialog.action === 'approve' ? 'success' : 'error'}
             />
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={() => setSnackbar({ ...snackbar, open: false })}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

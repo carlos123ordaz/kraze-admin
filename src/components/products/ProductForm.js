@@ -28,6 +28,7 @@ export default function ProductForm({
     initialValues = {},
     categories = [],
     onSubmit,
+    onCancel,
     loading = false,
 }) {
     const [formData, setFormData] = useState({
@@ -375,7 +376,7 @@ export default function ProductForm({
 
                 <Grid size={{ xs: 12 }}>
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                        <Button variant="outlined" size="large">
+                        <Button variant="outlined" size="large" onClick={onCancel}>
                             Cancelar
                         </Button>
                         <Button

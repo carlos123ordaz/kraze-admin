@@ -20,12 +20,14 @@ import {
     Settings,
 } from '@mui/icons-material';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 
 const drawerWidth = 260;
 
 export default function TopBar({ onDrawerToggle }) {
     const { user, logout } = useAuth();
+    const router = useRouter();
     const [anchorEl, setAnchorEl] = useState(null);
 
     const handleMenu = (event) => {
@@ -119,12 +121,12 @@ export default function TopBar({ onDrawerToggle }) {
 
                         <Divider />
 
-                        <MenuItem onClick={handleClose} sx={{ gap: 1.5, py: 1 }}>
+                        <MenuItem onClick={() => { handleClose(); router.push('/settings'); }} sx={{ gap: 1.5, py: 1 }}>
                             <AccountCircle fontSize="small" />
                             <Typography variant="body2">Mi perfil</Typography>
                         </MenuItem>
 
-                        <MenuItem onClick={handleClose} sx={{ gap: 1.5, py: 1 }}>
+                        <MenuItem onClick={() => { handleClose(); router.push('/settings'); }} sx={{ gap: 1.5, py: 1 }}>
                             <Settings fontSize="small" />
                             <Typography variant="body2">Configuración</Typography>
                         </MenuItem>

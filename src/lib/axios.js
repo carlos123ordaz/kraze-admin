@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-   // baseURL: 'http://localhost:5000/api',
-     baseURL: 'https://kraze-app-production.up.railway.app/api',
+   baseURL: 'http://localhost:5000/api',
+    // baseURL: 'https://kraze-app-production.up.railway.app/api',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -27,7 +27,6 @@ axiosInstance.interceptors.response.use(
         if (error.response?.status === 401) {
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('token');
-                window.location.href = '/login';
             }
         }
         return Promise.reject(error);

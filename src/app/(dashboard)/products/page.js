@@ -10,6 +10,8 @@ import {
     InputLabel,
     Select,
     MenuItem,
+    Snackbar,
+    Alert,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import PageHeader from '../../../components/common/PageHeader';
@@ -38,6 +40,7 @@ export default function ProductsPage() {
         limite: 20,
     });
     const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         fetchProducts();
@@ -96,9 +99,11 @@ export default function ProductsPage() {
             await axios.delete(`/products/${deleteDialog.id}`);
             fetchProducts();
             setDeleteDialog({ open: false, id: null });
+            setSnackbar({ open: true, message: 'Producto eliminado correctamente', severity: 'success' });
         } catch (error) {
             console.error('Error al eliminar producto:', error);
-            alert('Error al eliminar producto');
+            setDeleteDialog({ open: false, id: null });
+            setSnackbar({ open: true, message: 'Error al eliminar el producto', severity: 'error' });
         }
     };
 
@@ -195,6 +200,21 @@ export default function ProductsPage() {
                 confirmText="Eliminar"
                 severity="error"
             />
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={() => setSnackbar({ ...snackbar, open: false })}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

@@ -23,10 +23,13 @@ import {
     Select,
     MenuItem,
     InputAdornment,
+    Snackbar,
+    Alert,
 } from '@mui/material';
 import { Add, Edit, Delete, LocalOffer } from '@mui/icons-material';
 import PageHeader from '../../../components/common/PageHeader';
 import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import { formatCurrency, formatDate } from '../../../lib/utils';
 import axios from '../../../lib/axios';
 
@@ -35,6 +38,7 @@ export default function CouponsPage() {
     const [loading, setLoading] = useState(true);
     const [dialog, setDialog] = useState({ open: false, data: null });
     const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         fetchCoupons();
@@ -81,9 +85,10 @@ export default function CouponsPage() {
             }
             fetchCoupons();
             handleCloseDialog();
+            setSnackbar({ open: true, message: 'Cupón guardado correctamente', severity: 'success' });
         } catch (error) {
             console.error('Error al guardar cupón:', error);
-            alert('Error al guardar cupón');
+            setSnackbar({ open: true, message: error.response?.data?.mensaje || 'Error al guardar cupón', severity: 'error' });
         }
     };
 
@@ -92,9 +97,11 @@ export default function CouponsPage() {
             await axios.delete(`/coupons/${deleteDialog.id}`);
             fetchCoupons();
             setDeleteDialog({ open: false, id: null });
+            setSnackbar({ open: true, message: 'Cupón eliminado correctamente', severity: 'success' });
         } catch (error) {
             console.error('Error al eliminar cupón:', error);
-            alert('Error al eliminar cupón');
+            setDeleteDialog({ open: false, id: null });
+            setSnackbar({ open: true, message: 'Error al eliminar el cupón', severity: 'error' });
         }
     };
 
@@ -126,9 +133,7 @@ export default function CouponsPage() {
             <Card>
                 <CardContent>
                     {loading ? (
-                        <Typography variant="body2" color="text.secondary" textAlign="center" py={3}>
-                            Cargando...
-                        </Typography>
+                        <LoadingSpinner />
                     ) : coupons.length === 0 ? (
                         <Typography variant="body2" color="text.secondary" textAlign="center" py={3}>
                             No hay cupones creados
@@ -311,6 +316,21 @@ export default function CouponsPage() {
                 confirmText="Eliminar"
                 severity="error"
             />
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={() => setSnackbar({ ...snackbar, open: false })}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

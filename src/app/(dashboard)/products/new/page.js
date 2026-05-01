@@ -72,6 +72,7 @@ export default function NewProductPage() {
             <ProductForm
                 categories={categories}
                 onSubmit={handleSubmit}
+                onCancel={() => router.push('/products')}
                 loading={loading}
             />
 

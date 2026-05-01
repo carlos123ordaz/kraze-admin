@@ -106,6 +106,7 @@ export default function EditProductPage() {
                 initialValues={product}
                 categories={categories}
                 onSubmit={handleSubmit}
+                onCancel={() => router.push('/products')}
                 loading={saving}
             />
 
